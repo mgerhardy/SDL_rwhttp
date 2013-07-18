@@ -17,7 +17,7 @@ int SDL_RWHttpShutdown (void)
 
 int SDL_RWHttpInit (void)
 {
-	SDL_SetHint(SDL_RWHTTP_HINT_USER_AGENT, "sdl_rwhttp/1.0");
+	SDL_SetHint(SDL_RWHTTP_HINT_USER_AGENT, "sdl_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION));
 #ifdef HAVE_CURL
 	const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
 	if (result == CURLE_OK)
