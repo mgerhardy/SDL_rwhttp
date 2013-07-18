@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libsdl_rwhttp.la
+lib_LTLIBRARIES = libSDL_rwhttp.la
 
-libsdl_rwhttp_la_SOURCES = \
+libSDL_rwhttp_la_SOURCES = \
 	SDL_rwhttp.c
 
 include_HEADERS = \
@@ -8,8 +8,8 @@ include_HEADERS = \
 
 EXTRA_DIST =
 
-libsdl_rwhttp_la_CFLAGS = -Wall @CURL_CFLAGS@ @SDL_CFLAGS@
+libSDL_rwhttp_la_CFLAGS = -Wall @CURL_CFLAGS@ @SDL_CFLAGS@
 
-libsdl_rwhttp_la_LDFLAGS = -no-undefined -release @VERSION@ -lm
+libSDL_rwhttp_la_LDFLAGS = -no-undefined -release @VERSION@ -lm
 
-libsdl_rwhttp_la_LIBADD = @CURL_LIBS@ @SDL_LIBS@
+libSDL_rwhttp_la_LIBADD = @CURL_LIBS@ @SDL_LIBS@
