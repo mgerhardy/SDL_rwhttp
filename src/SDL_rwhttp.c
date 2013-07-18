@@ -27,7 +27,6 @@ int SDL_RWHttpInit (void)
 	if (!userAgent)
 		userAgent = "sdl_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION);
 
-
 	hint = SDL_GetHint(SDL_RWHTTP_HINT_CONNECTTIMEOUT);
 	if (hint)
 		connectTimeout = atoi(hint);
@@ -41,10 +40,12 @@ int SDL_RWHttpInit (void)
 		timeout = 3;
 
 #ifdef HAVE_CURL
-	const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-	if (result == CURLE_OK)
-		return 0;
-	SDL_SetError(curl_easy_strerror(result));
+	{
+		const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+		if (result == CURLE_OK)
+			return 0;
+		SDL_SetError(curl_easy_strerror(result));
+	}
 #else
 	SDL_SetError("Required library is missing");
 #endif
