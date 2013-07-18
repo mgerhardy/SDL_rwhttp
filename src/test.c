@@ -5,7 +5,10 @@
 int main (int argc, char *argv[])
 {
 	int ret = EXIT_SUCCESS;
-	SDL_RWHttpInit();
+	if (SDL_RWHttpInit() == -1) {
+		fprintf(stderr, "%s\n", SDL_GetError());
+		return EXIT_FAILURE;
+	}
 
 	SDL_RWops* rwops = SDL_RWFromHttpSync("http://www.google.de");
 	if (!rwops) {
@@ -16,6 +19,9 @@ int main (int argc, char *argv[])
 	}
 	SDL_FreeRW(rwops);
 
-	SDL_RWHttpShutdown();
+	if (SDL_RWHttpShutdown() == -1) {
+		fprintf(stderr, "%s\n", SDL_GetError());
+		return EXIT_FAILURE;
+	}
 	return ret;
 }
