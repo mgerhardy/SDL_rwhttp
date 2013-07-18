@@ -57,6 +57,7 @@ typedef struct {
 	char *uri;
 	char *data;
 	size_t size;
+	size_t expectedSize;
 } http_data_t;
 
 static int SDLCALL http_close (SDL_RWops * context)
@@ -86,9 +87,14 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 	const size_t realsize = size * nmemb;
 	http_data_t *httpData = (http_data_t *) userData;
 
-	httpData->data = SDL_realloc(httpData->data, httpData->size + realsize + 1);
-	if (httpData->data == NULL ) {
-		SDL_SetError("not enough memory (realloc returned NULL)");
+	if (httpData->expectedSize == 0) {
+		httpData->data = SDL_realloc(httpData->data, httpData->size + realsize + 1);
+		if (httpData->data == NULL) {
+			SDL_SetError("not enough memory (realloc returned NULL)");
+			return 0;
+		}
+	} else if (httpData->size + realsize >= httpData->expectedSize) {
+		SDL_SetError("illegal Content-Length - buffer overflow");
 		return 0;
 	}
 
@@ -97,6 +103,29 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 	httpData->data[httpData->size] = 0;
 
 	return realsize;
+}
+
+size_t curlHttpHeader (void *headerData, size_t size, size_t nmemb, void *userData)
+{
+	const char *header = (const char *)headerData;
+	const size_t bytes = size * nmemb;
+	const char *contentLength = "Content-Length: ";
+	const size_t strLength = strlen(contentLength);
+
+	if (bytes <= strLength)
+		return bytes;
+
+	if (!SDL_strncasecmp(header, contentLength, strLength)) {
+		http_data_t *httpData = (http_data_t *) userData;
+		httpData->expectedSize = SDL_strtoul(header + strLength, NULL, 10);
+		httpData->data = SDL_malloc(httpData->expectedSize);
+		if (httpData->data == NULL) {
+			SDL_SetError("not enough memory (malloc returned NULL)");
+			return 0;
+		}
+	}
+
+	return bytes;
 }
 #endif
 
@@ -121,8 +150,16 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	curlHandle = curl_easy_init();
 	curl_easy_setopt(curlHandle, CURLOPT_URL, uri);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, curlHttpWriteSync);
+	curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, curlHttpHeader);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, (void * )httpData);
-	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, SDL_GetHint(SDL_RWHTTP_HINT_USER_AGENT));
+	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, userAgent);
+	curl_easy_setopt(curlHandle, CURLOPT_NOSIGNAL, 1);
+	curl_easy_setopt(curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+	curl_easy_setopt(curlHandle, CURLOPT_MAXREDIRS, 5);
+	curl_easy_setopt(curlHandle, CURLOPT_NOPROGRESS, 1);
+	curl_easy_setopt(curlHandle, CURLOPT_FAILONERROR, 1);
+	curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, connectTimeout);
+	curl_easy_setopt(curlHandle, CURLOPT_TIMEOUT, timeout);
 
 	result = curl_easy_perform(curlHandle);
 	if (result != CURLE_OK) {
