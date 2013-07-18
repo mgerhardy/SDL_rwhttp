@@ -25,7 +25,7 @@ int SDL_RWHttpInit (void)
 
 	userAgent = SDL_GetHint(SDL_RWHTTP_HINT_USER_AGENT);
 	if (!userAgent)
-		userAgent = "sdl_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION);
+		userAgent = "SDL_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION);
 
 	hint = SDL_GetHint(SDL_RWHTTP_HINT_CONNECTTIMEOUT);
 	if (hint)
