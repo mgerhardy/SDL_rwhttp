@@ -16,9 +16,25 @@
 
 #define SDL_RWOPS_HTTP 404
 
+/**
+ *  \brief Initializes the library. Should only be called once per application.
+ *
+ *  \return -1 if any error occurred, 0 otherwise.
+ */
 int SDL_RWHttpInit (void);
+
+/*
+ * \brief Cleanup the library.
+ *
+ *  \return -1 if any error occurred, 0 otherwise.
+ */
 int SDL_RWHttpShutdown (void);
 
+/**
+ *  \name RWFrom functions
+ *
+ *  Functions to create SDL_RWops structures from http streams.
+ */
 SDL_RWops* SDL_RWFromHttpAsync (const char *uri);
 SDL_RWops* SDL_RWFromHttpSync (const char *uri);
 
