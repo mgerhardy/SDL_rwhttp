@@ -24,7 +24,7 @@ int main (int argc, char *argv[])
 		fprintf(stderr, "%s\n", SDL_GetError());
 		ret = EXIT_FAILURE;
 	} else {
-		printf("success\n");
+		printf("success with length: %i\n", (int)SDL_RWsize(rwops));
 	}
 	SDL_FreeRW(rwops);
 
