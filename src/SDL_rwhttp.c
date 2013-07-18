@@ -110,9 +110,13 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 #endif
 
 	rwops = SDL_RWFromConstMem(httpData->data, httpData->size);
-	rwops->hidden.unknown.data1 = curlHandle;
-	rwops->hidden.unknown.data2 = httpData;
-	rwops->close = http_close;
+	if (rwops) {
+		rwops->hidden.unknown.data1 = curlHandle;
+		rwops->hidden.unknown.data2 = httpData;
+		rwops->close = http_close;
+	} else {
+		SDL_SetError("Could not fetch the data from %s", uri);
+	}
 	return rwops;
 }
 
