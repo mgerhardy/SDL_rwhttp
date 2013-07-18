@@ -1,4 +1,3 @@
-#include <SDL.h>
 #include <curl/curl.h>
 #include "SDL_rwhttp.h"
 
@@ -65,27 +64,27 @@ static size_t httpWriteSync (void *streamData, size_t size, size_t nmemb, void *
 SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 {
 	SDL_RWops *rwops;
-	CURL* curl_handle;
+	CURL* curlHandle;
 	http_data_t *httpData;
 	CURLcode result;
 
 	httpData = SDL_malloc(sizeof(*httpData));
 	SDL_zerop(httpData);
 
-	curl_handle = curl_easy_init();
-	curl_easy_setopt(curl_handle, CURLOPT_URL, uri);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, httpWriteSync);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void * )httpData);
-	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "sdl_rwhttp/1.0");
+	curlHandle = curl_easy_init();
+	curl_easy_setopt(curlHandle, CURLOPT_URL, uri);
+	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, httpWriteSync);
+	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, (void * )httpData);
+	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, "sdl_rwhttp/1.0");
 
-	result = curl_easy_perform(curl_handle);
+	result = curl_easy_perform(curlHandle);
 	if (result != CURLE_OK) {
 		SDL_SetError(curl_easy_strerror(result));
 		return NULL ;
 	}
 
 	rwops = SDL_RWFromConstMem(httpData->data, httpData->size);
-	rwops->hidden.unknown.data1 = curl_handle;
+	rwops->hidden.unknown.data1 = curlHandle;
 	rwops->hidden.unknown.data2 = httpData;
 	rwops->close = http_close;
 	return rwops;
