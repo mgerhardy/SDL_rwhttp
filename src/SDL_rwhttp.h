@@ -1,0 +1,25 @@
+#ifndef _SDL_RWHTTP_
+#define _SDL_RWHTTP_
+
+#include <SDL.h>
+
+#define SDL_RWHTTP_MAJOR_VERSION   0
+#define SDL_RWHTTP_MINOR_VERSION   1
+#define SDL_RWHTTP_PATCHLEVEL      0
+
+#define SDL_RWHTTP_VERSION(x) \
+{ \
+    (x)->major = SDL_RWHTTP_MAJOR_VERSION; \
+    (x)->minor = SDL_RWHTTP_MINOR_VERSION; \
+    (x)->patch = SDL_RWHTTP_PATCHLEVEL;    \
+}
+
+#define SDL_RWOPS_HTTP 404
+
+int SDL_RWHttpInit (void);
+int SDL_RWHttpShutdown (void);
+
+SDL_RWops* SDL_RWFromHttpAsync (const char *uri);
+SDL_RWops* SDL_RWFromHttpSync (const char *uri);
+
+#endif

@@ -1,0 +1,36 @@
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+*.lo
+*.la
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Eclipse project files
+.project
+.cproject
+
+.deps
+.libs
+
+/aclocal.m4
+/configure
+/autom4te.cache
+Makefile.in
+Makefile
+/config.log
+/config.status
+/libsdl_rwhttp.pc
+/libtool
