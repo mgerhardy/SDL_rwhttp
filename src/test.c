@@ -10,7 +10,14 @@ int main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	SDL_RWops* rwops = SDL_RWFromHttpSync("http://www.google.de");
+	const char *url;
+	if (argc == 2) {
+		url = argv[1];
+	} else {
+		url = "http://www.google.de";
+	}
+
+	SDL_RWops* rwops = SDL_RWFromHttpSync(url);
 	if (!rwops) {
 		fprintf(stderr, "%s\n", SDL_GetError());
 		ret = EXIT_FAILURE;
