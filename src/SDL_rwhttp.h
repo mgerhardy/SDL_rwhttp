@@ -25,21 +25,28 @@ extern "C" {
 
 /**
  * \brief A variable that lets you specify the user agent the requests are using.
+ *
+ * \note The value can not be changed after \c SDL_RWHttpInit was called.
  */
 #define SDL_RWHTTP_HINT_USER_AGENT "SDL_RWHTTP_USERAGENT"
 
 /**
  * \brief
+ *
+ * \note The value can not be changed after \c SDL_RWHttpInit was called.
  */
 #define SDL_RWHTTP_HINT_CONNECTTIMEOUT "SDL_RWHTTP_CONNECTTIMEOUT"
 
 /**
  * \brief
+ *
+ * \note The value can not be changed after \c SDL_RWHttpInit was called.
  */
 #define SDL_RWHTTP_HINT_TIMEOUT "SDL_RWHTTP_TIMEOUT"
 
 /**
  * \brief Initializes the library. Should only be called once per application.
+ * Also initializes and caches the hint values.
  *
  * \return -1 if any error occurred, 0 otherwise.
  */
