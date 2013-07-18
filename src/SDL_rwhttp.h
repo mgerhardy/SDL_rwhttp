@@ -17,6 +17,11 @@
 #define SDL_RWOPS_HTTP 404
 
 /**
+ *  \brief A variable that lets you specify the user agent the requests are using.
+ */
+#define SDL_RWHTTP_HINT_USER_AGENT "SDL_RWHTTP_USERAGENT"
+
+/**
  *  \brief Initializes the library. Should only be called once per application.
  *
  *  \return -1 if any error occurred, 0 otherwise.

@@ -9,6 +9,7 @@ int SDL_RWHttpShutdown (void)
 
 int SDL_RWHttpInit (void)
 {
+	SDL_SetHint(SDL_RWHTTP_HINT_USER_AGENT, "sdl_rwhttp/1.0");
 	const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
 	if (result == CURLE_OK)
 		return 0;
@@ -75,7 +76,7 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	curl_easy_setopt(curlHandle, CURLOPT_URL, uri);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, httpWriteSync);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, (void * )httpData);
-	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, "sdl_rwhttp/1.0");
+	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, SDL_GetHint(SDL_RWHTTP_HINT_USER_AGENT));
 
 	result = curl_easy_perform(curlHandle);
 	if (result != CURLE_OK) {
