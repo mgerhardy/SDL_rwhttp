@@ -9,6 +9,10 @@
 
 #define STRINGIFY(x) #x
 
+static const char *userAgent;
+static int connectTimeout;
+static int timeout;
+
 int SDL_RWHttpShutdown (void)
 {
 	curl_global_cleanup();
@@ -17,7 +21,25 @@ int SDL_RWHttpShutdown (void)
 
 int SDL_RWHttpInit (void)
 {
-	SDL_SetHint(SDL_RWHTTP_HINT_USER_AGENT, "sdl_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION));
+	const char *hint;
+
+	userAgent = SDL_GetHint(SDL_RWHTTP_HINT_USER_AGENT);
+	if (!userAgent)
+		userAgent = "sdl_rwhttp/" STRINGIFY(SDL_RWHTTP_MAJOR_VERSION) "." STRINGIFY(SDL_RWHTTP_MINOR_VERSION);
+
+
+	hint = SDL_GetHint(SDL_RWHTTP_HINT_CONNECTTIMEOUT);
+	if (hint)
+		connectTimeout = atoi(hint);
+	else
+		connectTimeout = 3;
+
+	hint = SDL_GetHint(SDL_RWHTTP_HINT_TIMEOUT);
+	if (hint)
+		timeout = atoi(hint);
+	else
+		timeout = 3;
+
 #ifdef HAVE_CURL
 	const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
 	if (result == CURLE_OK)
