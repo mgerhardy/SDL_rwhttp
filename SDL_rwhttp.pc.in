@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libsdl_rwhttp
+Name: SDL_rwhttp
 Version: @VERSION@
 Description: Extends SDL with http RWops support
-Libs: -L${libdir} @SDL_LIBS@ @CURL_LIBS@ -lsdl_rwhttp
+Libs: -L${libdir} @SDL_LIBS@ @CURL_LIBS@ -lSDL_rwhttp
 Libs.private:
 Cflags: -I${includedir} @SDL_CFLAGS@ @CURL_CFLAGS@

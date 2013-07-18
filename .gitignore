@@ -32,5 +32,5 @@ Makefile.in
 Makefile
 /config.log
 /config.status
-/libsdl_rwhttp.pc
+/SDL_rwhttp.pc
 /libtool

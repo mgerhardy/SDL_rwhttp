@@ -4,4 +4,4 @@ SUBDIRS = . src
 
 pkgconfigdir=${libdir}/pkgconfig
 
-pkgconfig_DATA = libsdl_rwhttp.pc
+pkgconfig_DATA = SDL_rwhttp.pc

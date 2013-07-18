@@ -32,5 +32,5 @@ AC_SUBST(CURL_LIBS)
 AC_OUTPUT(
 	Makefile
 	src/Makefile
-	libsdl_rwhttp.pc
+	SDL_rwhttp.pc
 )
