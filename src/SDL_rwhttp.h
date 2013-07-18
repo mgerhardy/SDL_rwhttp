@@ -45,6 +45,13 @@ extern "C" {
 #define SDL_RWHTTP_HINT_TIMEOUT "SDL_RWHTTP_TIMEOUT"
 
 /**
+ * \brief Defines the max. allowed size of a file to download.
+ *
+ * \note The value can not be changed after \c SDL_RWHttpInit was called.
+ */
+#define SDL_RWHTTP_HINT_FETCHLIMIT "SDL_RWHTTP_FETCHLIMIT"
+
+/**
  * \brief Initializes the library. Should only be called once per application.
  * Also initializes and caches the hint values.
  *

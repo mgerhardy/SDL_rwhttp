@@ -12,6 +12,7 @@
 static const char *userAgent;
 static int connectTimeout;
 static int timeout;
+static int fetchLimit;
 
 int SDL_RWHttpShutdown (void)
 {
@@ -38,6 +39,12 @@ int SDL_RWHttpInit (void)
 		timeout = atoi(hint);
 	else
 		timeout = 3;
+
+	hint = SDL_GetHint(SDL_RWHTTP_HINT_FETCHLIMIT);
+	if (hint)
+		fetchLimit = atoi(hint);
+	else
+		fetchLimit = 1024 * 1024 * 5;
 
 #ifdef HAVE_CURL
 	{
@@ -89,7 +96,12 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 	http_data_t *httpData = (http_data_t *) userData;
 
 	if (httpData->expectedSize == 0) {
-		httpData->data = SDL_realloc(httpData->data, httpData->size + realsize + 1);
+		const int newSize = httpData->size + realsize + 1;
+		if (newSize > fetchLimit) {
+			SDL_SetError("file exceeded the hardcoded limit of %i (%i)", fetchLimit, (int)newSize);
+			return 0;
+		}
+		httpData->data = SDL_realloc(httpData->data, newSize);
 		if (httpData->data == NULL) {
 			SDL_SetError("not enough memory (realloc returned NULL)");
 			return 0;
@@ -119,6 +131,14 @@ size_t curlHttpHeader (void *headerData, size_t size, size_t nmemb, void *userDa
 	if (!SDL_strncasecmp(header, contentLength, strLength)) {
 		http_data_t *httpData = (http_data_t *) userData;
 		httpData->expectedSize = SDL_strtoul(header + strLength, NULL, 10);
+		if (httpData->expectedSize <= 0) {
+			SDL_SetError("invalid content length given: %i", (int)httpData->expectedSize);
+			return 0;
+		}
+		if (httpData->expectedSize > fetchLimit) {
+			SDL_SetError("content length exceeded the hardcoded limit of %i (%i)", fetchLimit, (int)httpData->expectedSize);
+			return 0;
+		}
 		httpData->data = SDL_malloc(httpData->expectedSize);
 		if (httpData->data == NULL) {
 			SDL_SetError("not enough memory (malloc returned NULL)");
