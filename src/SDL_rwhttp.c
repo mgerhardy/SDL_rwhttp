@@ -87,6 +87,11 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	CURLcode result;
 #endif
 
+	if (!uri || uri[0] == '\0') {
+		SDL_SetError("No uri given");
+		return NULL;
+	}
+
 	httpData = SDL_malloc(sizeof(*httpData));
 	SDL_zerop(httpData);
 
