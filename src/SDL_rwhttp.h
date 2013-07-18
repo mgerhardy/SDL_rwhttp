@@ -2,6 +2,13 @@
 #define _SDL_RWHTTP_
 
 #include <SDL.h>
+#include <SDL_version.h>
+#include <begin_code.h>
+
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define SDL_RWHTTP_MAJOR_VERSION   0
 #define SDL_RWHTTP_MINOR_VERSION   1
@@ -26,21 +33,27 @@
  *
  *  \return -1 if any error occurred, 0 otherwise.
  */
-int SDL_RWHttpInit (void);
+extern DECLSPEC int SDL_RWHttpInit (void);
 
 /*
  * \brief Cleanup the library.
  *
  *  \return -1 if any error occurred, 0 otherwise.
  */
-int SDL_RWHttpShutdown (void);
+extern DECLSPEC int SDL_RWHttpShutdown (void);
 
 /**
  *  \name RWFrom functions
  *
  *  Functions to create SDL_RWops structures from http streams.
  */
-SDL_RWops* SDL_RWFromHttpAsync (const char *uri);
-SDL_RWops* SDL_RWFromHttpSync (const char *uri);
+extern DECLSPEC SDL_RWops* SDL_RWFromHttpAsync (const char *uri);
+extern DECLSPEC SDL_RWops* SDL_RWFromHttpSync (const char *uri);
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+}
+#endif
+#include <close_code.h>
 
 #endif
