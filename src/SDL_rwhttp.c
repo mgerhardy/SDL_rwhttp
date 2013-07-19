@@ -49,8 +49,9 @@ int SDL_RWHttpInit (void)
 #ifdef HAVE_CURL
 	{
 		const CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
-		if (result == CURLE_OK)
+		if (result == CURLE_OK) {
 			return 0;
+		}
 		SDL_SetError(curl_easy_strerror(result));
 	}
 #else
@@ -59,34 +60,97 @@ int SDL_RWHttpInit (void)
 	return -1;
 }
 
-#define http_get_curl(context) (CURL*) (context)->hidden.unknown.data1
-
 typedef struct {
 	char *uri;
 	char *data;
 	size_t size;
 	size_t expectedSize;
+	void *userData;
+	Uint8 *base;
+	Uint8 *here;
+	Uint8 *stop;
 } http_data_t;
 
 static int SDLCALL http_close (SDL_RWops * context)
 {
 	int status = 0;
-	if (!context)
+	if (!context) {
 		return status;
+	}
 
 	if (context->hidden.unknown.data1) {
+		http_data_t *data = (http_data_t*) context->hidden.unknown.data1;
 #ifdef HAVE_CURL
-		CURL *curl = http_get_curl(context);
+		CURL *curl = (CURL*)data->userData;
 		curl_easy_cleanup(curl);
 #endif
-	}
-	if (context->hidden.unknown.data2) {
-		http_data_t *data = (http_data_t*) context->hidden.unknown.data2;
 		SDL_free(data->data);
 		SDL_free(data);
 	}
 	SDL_FreeRW(context);
 	return status;
+}
+
+static Sint64 SDLCALL http_size (SDL_RWops * context)
+{
+	const http_data_t *data = (const http_data_t*) context->hidden.unknown.data1;
+	return (Sint64)(data->stop - data->base);
+}
+
+static Sint64 SDLCALL http_seek (SDL_RWops * context, Sint64 offset, int whence)
+{
+	http_data_t *data = (http_data_t*) context->hidden.unknown.data1;
+	Uint8 *newpos;
+
+	switch (whence) {
+	case RW_SEEK_SET:
+		newpos = data->base + offset;
+		break;
+	case RW_SEEK_CUR:
+		newpos = data->here + offset;
+		break;
+	case RW_SEEK_END:
+		newpos = data->stop + offset;
+		break;
+	default:
+		return SDL_SetError("Unknown value for 'whence'");
+	}
+	if (newpos < data->base) {
+		newpos = data->base;
+	}
+	if (newpos > data->stop) {
+		newpos = data->stop;
+	}
+	data->here = newpos;
+	return (Sint64)(data->here - data->base);
+}
+
+static size_t SDLCALL http_read (SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
+{
+	http_data_t *data = (http_data_t*) context->hidden.unknown.data1;
+	size_t total_bytes;
+	size_t mem_available;
+
+	total_bytes = (maxnum * size);
+	if (maxnum <= 0 || size <= 0 || total_bytes / maxnum != (size_t) size) {
+		return 0;
+	}
+
+	mem_available = data->stop - data->here;
+	if (total_bytes > mem_available) {
+		total_bytes = mem_available;
+	}
+
+	SDL_memcpy(ptr, data->here, total_bytes);
+	data->here += total_bytes;
+
+	return total_bytes / size;
+}
+
+static size_t SDLCALL http_writeconst (SDL_RWops * context, const void *ptr, size_t size, size_t num)
+{
+	SDL_SetError("Can't write to read-only memory");
+	return 0;
 }
 
 #ifdef HAVE_CURL
@@ -124,8 +188,9 @@ size_t curlHttpHeader (void *headerData, size_t size, size_t nmemb, void *userDa
 	const char *contentLength = "Content-Length: ";
 	const size_t strLength = strlen(contentLength);
 
-	if (bytes <= strLength)
+	if (bytes <= strLength) {
 		return bytes;
+	}
 
 	if (!SDL_strncasecmp(header, contentLength, strLength)) {
 		http_data_t *httpData = (http_data_t *) userData;
@@ -148,6 +213,27 @@ size_t curlHttpHeader (void *headerData, size_t size, size_t nmemb, void *userDa
 	return bytes;
 }
 #endif
+
+static SDL_RWops* SDL_RWHttpCreate (http_data_t *httpData)
+{
+	SDL_RWops *rwops = SDL_AllocRW();
+	if (!rwops)
+		return NULL;
+
+	rwops->size = http_size;
+	rwops->seek = http_seek;
+	rwops->read = http_read;
+	rwops->write = http_writeconst;
+	rwops->close = http_close;
+
+	httpData->base = (Uint8*) httpData->data;
+	httpData->here = httpData->base;
+	httpData->stop = httpData->base + httpData->size;
+
+	rwops->hidden.unknown.data1 = httpData;
+	rwops->type = SDL_RWOPS_HTTP;
+	return rwops;
+}
 
 SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 {
@@ -182,19 +268,17 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, connectTimeout);
 	curl_easy_setopt(curlHandle, CURLOPT_TIMEOUT, timeout);
 
+	httpData->userData = curlHandle;
+
 	result = curl_easy_perform(curlHandle);
 	if (result != CURLE_OK) {
 		SDL_SetError(curl_easy_strerror(result));
-		return NULL ;
+		return NULL;
 	}
 #endif
 
-	rwops = SDL_RWFromConstMem(httpData->data, httpData->size);
-	if (rwops) {
-		rwops->hidden.unknown.data1 = curlHandle;
-		rwops->hidden.unknown.data2 = httpData;
-		rwops->close = http_close;
-	} else {
+	rwops = SDL_RWHttpCreate(httpData);
+	if (!rwops) {
 		SDL_SetError("Could not fetch the data from %s", uri);
 	}
 	return rwops;
@@ -203,5 +287,5 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 SDL_RWops* SDL_RWFromHttpAsync (const char *uri)
 {
 	SDL_SetError("Not yet supported");
-	return NULL ;
+	return NULL;
 }
