@@ -173,6 +173,7 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, curlHttpWriteSync);
 	curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, curlHttpHeader);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, (void * )httpData);
+	curl_easy_setopt(curlHandle, CURLOPT_HEADERDATA, (void * )httpData);
 	curl_easy_setopt(curlHandle, CURLOPT_USERAGENT, userAgent);
 	curl_easy_setopt(curlHandle, CURLOPT_NOSIGNAL, 1);
 	curl_easy_setopt(curlHandle, CURLOPT_FOLLOWLOCATION, 1);
