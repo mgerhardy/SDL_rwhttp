@@ -106,7 +106,7 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 			SDL_SetError("not enough memory (realloc returned NULL)");
 			return 0;
 		}
-	} else if (httpData->size + realsize >= httpData->expectedSize) {
+	} else if (httpData->size + realsize > httpData->expectedSize) {
 		SDL_SetError("illegal Content-Length - buffer overflow");
 		return 0;
 	}
