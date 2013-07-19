@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// gcc src/test.c `pkg-config --libs libsdl_rwhttp` `pkg-config --cflags libsdl_rwhttp`
+// gcc src/test.c `pkg-config --libs SDL_rwhttp` `pkg-config --cflags SDL_rwhttp`
 
 int main (int argc, char *argv[])
 {
