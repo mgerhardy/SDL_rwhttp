@@ -130,7 +130,7 @@ size_t curlHttpHeader (void *headerData, size_t size, size_t nmemb, void *userDa
 	if (!SDL_strncasecmp(header, contentLength, strLength)) {
 		http_data_t *httpData = (http_data_t *) userData;
 		httpData->expectedSize = SDL_strtoul(header + strLength, NULL, 10);
-		if (httpData->expectedSize <= 0) {
+		if (httpData->expectedSize == 0) {
 			SDL_SetError("invalid content length given: %i", (int)httpData->expectedSize);
 			return 0;
 		}
