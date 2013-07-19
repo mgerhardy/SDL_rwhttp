@@ -96,7 +96,7 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 	http_data_t *httpData = (http_data_t *) userData;
 
 	if (httpData->expectedSize == 0) {
-		const int newSize = httpData->size + realsize + 1;
+		const int newSize = httpData->size + realsize;
 		if (newSize > fetchLimit) {
 			SDL_SetError("file exceeded the hardcoded limit of %i (%i)", fetchLimit, (int)newSize);
 			return 0;
@@ -113,7 +113,6 @@ static size_t curlHttpWriteSync (void *streamData, size_t size, size_t nmemb, vo
 
 	SDL_memcpy(&(httpData->data[httpData->size]), streamData, realsize);
 	httpData->size += realsize;
-	httpData->data[httpData->size] = 0;
 
 	return realsize;
 }
