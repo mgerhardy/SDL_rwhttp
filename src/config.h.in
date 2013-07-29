@@ -15,6 +15,15 @@
 /* found sdl 1.x */
 #undef HAVE_SDL
 
+/* found sdl 2.x */
+#undef HAVE_SDL2
+
+/* found SDL2_net */
+#undef HAVE_SDL2_NET
+
+/* found SDL_net */
+#undef HAVE_SDL_NET
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 

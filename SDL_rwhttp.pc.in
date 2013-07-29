@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: SDL_rwhttp
 Version: @VERSION@
 Description: Extends SDL with http RWops support
-Libs: -L${libdir} @SDL_LIBS@ @CURL_LIBS@ -lSDL_rwhttp
+Libs: -L${libdir} @SDL_LIBS@ @SDL2_LIBS@ @SDL_NET_LIBS@ @SDL2_NET_LIBS@ @CURL_LIBS@ -lSDL_rwhttp
 Libs.private:
-Cflags: -I${includedir} @SDL_CFLAGS@ @CURL_CFLAGS@
+Cflags: -I${includedir} @SDL_CFLAGS@ @SDL2_CFLAGS@ @SDL_NET_CFLAGS@ @SDL2_NET_CFLAGS@ @CURL_CFLAGS@

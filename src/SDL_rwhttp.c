@@ -5,6 +5,9 @@
 #ifdef HAVE_CURL
 #include <curl/curl.h>
 #endif
+#if defined(HAVE_SDL_NET) || defined(HAVE_SDL2_NET)
+#include <SDL_net.h>
+#endif
 #include "SDL_rwhttp.h"
 
 #define STRINGIFY(x) #x
@@ -57,8 +60,17 @@ int SDL_RWHttpInit (void)
 		SDL_SetError(curl_easy_strerror(result));
 	}
 #else
-	SDL_SetError("Required library is missing");
+#if defined(HAVE_SDL_NET) || defined(HAVE_SDL2_NET)
+	{
+		if (SDLNet_Init() >= 0)
+			/* The sdl error is already set */
+			return 0;
+		return -1;
+	}
 #endif
+#endif
+
+	SDL_SetError("Required library is missing");
 	return -1;
 }
 
@@ -244,6 +256,12 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 #ifdef HAVE_CURL
 	CURL* curlHandle;
 	CURLcode result;
+#else
+#if defined(HAVE_SDL_NET) || defined(HAVE_SDL2_NET)
+	IPaddress ip;
+	int port = 80;
+	TCPsocket socket;
+#endif
 #endif
 
 	if (!uri || uri[0] == '\0') {
@@ -277,6 +295,44 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 		SDL_SetError(curl_easy_strerror(result));
 		return NULL;
 	}
+#else
+#if defined(HAVE_SDL_NET) || defined(HAVE_SDL2_NET)
+	if (SDL_strstr(uri, "://") != NULL)
+		uri = SDL_strstr(uri, "://") + 3;
+	if (SDL_strchr(uri, ':')) {
+		port = atoi(SDL_strchr(uri, ':') + 1);
+	}
+	if (SDLNet_ResolveHost(&ip, uri, port) < 0) {
+		/* sdl error is already set */
+		return NULL;
+	}
+
+	if (!(socket = SDLNet_TCP_Open(&ip))) {
+		return NULL;
+	} else {
+		const size_t bufSize = 512;
+		Uint8 *buf;
+		const int length = 80 + strlen(uri) + strlen(userAgent);
+		char *request = SDL_malloc(length);
+		if (request == NULL) {
+			SDL_SetError("not enough memory (malloc returned NULL)");
+			SDLNet_TCP_Close(socket);
+			return NULL;
+		}
+		SDL_snprintf(request, length - 1, "GET / HTTP/1.0\r\nHost: %s\r\nConnection: close\r\nUser-Agent: %s\r\n\r\n", uri, userAgent);
+
+		if (SDLNet_TCP_Send(socket, request, strlen(request)) < strlen(request)) {
+			SDL_SetError("sending the request failed");
+			SDLNet_TCP_Close(socket);
+			return NULL;
+		}
+
+		buf = SDL_malloc(bufSize + 1);
+		// TODO: recv
+		SDL_free(buf);
+	}
+	SDLNet_TCP_Close(socket);
+#endif
 #endif
 
 	rwops = SDL_RWHttpCreate(httpData);
