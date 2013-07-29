@@ -16,7 +16,9 @@ static int fetchLimit;
 
 int SDL_RWHttpShutdown (void)
 {
+#ifdef HAVE_CURL
 	curl_global_cleanup();
+#endif
 	return 0;
 }
 
