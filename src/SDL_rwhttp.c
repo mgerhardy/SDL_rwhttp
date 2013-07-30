@@ -393,6 +393,8 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 	result = curl_easy_perform(curlHandle);
 	if (result != CURLE_OK) {
 		SDL_SetError(curl_easy_strerror(result));
+		SDL_free(httpData->data);
+		SDL_free(httpData);
 		return NULL;
 	}
 #else
@@ -414,17 +416,21 @@ SDL_RWops* SDL_RWFromHttpSync (const char *uri)
 
 	if (SDLNet_ResolveHost(&ip, host, port) < 0) {
 		SDL_free(host);
+		SDL_free(httpData);
 		/* sdl error is already set */
 		return NULL;
 	}
 	SDL_free(host);
 
 	if (!(socket = SDLNet_TCP_Open(&ip))) {
+		SDL_free(httpData);
 		return NULL;
 	}
 
 	if (SDL_RWHttpSDLNetDownload(httpData, socket, uri, port) == -1) {
 		SDLNet_TCP_Close(socket);
+		SDL_free(httpData->data);
+		SDL_free(httpData);
 		return NULL;
 	}
 
