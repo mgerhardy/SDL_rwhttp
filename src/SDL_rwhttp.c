@@ -12,7 +12,8 @@
 #endif
 #include "SDL_rwhttp.h"
 
-#define STRINGIFY(x) #x
+#define STRINGIFY_(x) #x
+#define STRINGIFY(x) STRINGIFY_(x)
 
 static const char *userAgent;
 static int connectTimeout;
