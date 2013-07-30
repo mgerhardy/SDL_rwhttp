@@ -257,8 +257,10 @@ static int SDL_RWHttpSDLNetDownload (http_data_t *httpData, TCPsocket socket, co
 
 	if (SDLNet_TCP_Send(socket, request, strlen(request)) < strlen(request)) {
 		SDL_SetError("sending the request '%s' failed", request);
+		SDL_free(request);
 		return -1;
 	}
+	SDL_free(request);
 
 	bufPtr = buf = SDL_malloc(bufSize);
 	for (;;) {
