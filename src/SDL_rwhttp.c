@@ -244,16 +244,19 @@ static int SDL_RWHttpSDLNetDownload (http_data_t *httpData, TCPsocket socket, co
 	char *request = SDL_malloc(length);
 	char *host;
 	SDL_bool headerParsed = SDL_FALSE;
+	char *path;
+
 	if (request == NULL) {
 		SDL_SetError("not enough memory (malloc returned NULL)");
 		return -1;
 	}
 
 	host = SDL_strdup(uri);
-	if (SDL_strchr(host, '/')) {
-		SDL_strchr(host, '/')[0] = '\0';
+	path = SDL_strchr(host, '/');
+	if (path) {
+		path[0] = '\0';
 	}
-	SDL_snprintf(request, length - 1, "GET / HTTP/1.0\r\nHost: %s\r\nConnection: close\r\nUser-Agent: %s\r\n\r\n", host, userAgent);
+	SDL_snprintf(request, length - 1, "GET /%s HTTP/1.0\r\nHost: %s\r\nConnection: close\r\nUser-Agent: %s\r\n\r\n", path ? path + 1 : "", host, userAgent);
 	SDL_free(host);
 
 	if (SDLNet_TCP_Send(socket, request, strlen(request)) < strlen(request)) {
