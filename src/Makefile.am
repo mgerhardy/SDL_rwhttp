@@ -8,7 +8,7 @@ include_HEADERS = \
 
 EXTRA_DIST =
 
-libSDL_rwhttp_la_CFLAGS = -Wall @CURL_CFLAGS@ @SDL_NET_CFLAGS@ @SDL2_NET_CFLAGS@ @SDL_CFLAGS@ @SDL2_CFLAGS@
+libSDL_rwhttp_la_CFLAGS = -Wall -pedantic @CURL_CFLAGS@ @SDL_NET_CFLAGS@ @SDL2_NET_CFLAGS@ @SDL_CFLAGS@ @SDL2_CFLAGS@
 
 libSDL_rwhttp_la_LDFLAGS = -no-undefined -release @VERSION@ -lm
 
