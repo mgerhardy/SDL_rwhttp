@@ -279,7 +279,7 @@ static int SDL_RWHttpSDLNetDownload (http_data_t *httpData, TCPsocket socket, co
 			if (headerEnd != NULL) {
 				const ptrdiff_t bodySize = read - ((const Uint8*)headerEnd + 4 - bufPtr);
 				if (bodySize > 0) {
-					SDL_RWHttpWrite(bufPtr, 1, bodySize, httpData);
+					SDL_RWHttpWrite(headerEnd + 4, 1, bodySize, httpData);
 				}
 				headerParsed = SDL_TRUE;
 				char *headerLine = SDL_strdup((const char *)buf);
