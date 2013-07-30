@@ -273,17 +273,19 @@ static int SDL_RWHttpSDLNetDownload (http_data_t *httpData, TCPsocket socket, co
 		if (headerParsed) {
 			SDL_RWHttpWrite(bufPtr, 1, read, httpData);
 		} else {
-			const char *headerEnd;
+			char *headerEnd;
 			bufPtr[read] = '\0';
-			headerEnd = SDL_strstr((const char *)bufPtr, "\r\n\r\n");
+			headerEnd = SDL_strstr((char *)bufPtr, "\r\n\r\n");
 			if (headerEnd != NULL) {
-				const ptrdiff_t bodySize = read - ((const Uint8*)headerEnd + 4 - bufPtr);
+				const ptrdiff_t bodySize = read - ((Uint8*)headerEnd + 4 - bufPtr);
+				char *headerLine;
+				char *headerBegin;
 				if (bodySize > 0) {
 					SDL_RWHttpWrite(headerEnd + 4, 1, bodySize, httpData);
 				}
 				headerParsed = SDL_TRUE;
-				char *headerLine = SDL_strdup((const char *)buf);
-				char *headerBegin = headerLine;
+				headerLine = SDL_strdup((const char *)buf);
+				headerBegin = headerLine;
 				for (;;) {
 					char *newline = SDL_strstr(headerLine, "\r\n");
 					if (newline >= headerEnd) {
