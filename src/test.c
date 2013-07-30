@@ -50,7 +50,7 @@ static void write (SDL_RWops *download)
 
 	read(&buffer, download);
 	if (!buffer) {
-		SDL_FreeRW(rwops);
+		SDL_RWclose(rwops);
 		fprintf(stderr, "Could not read download rwops\n");
 		return;
 	}
@@ -62,7 +62,7 @@ static void write (SDL_RWops *download)
 	while (remaining) {
 		const size_t written = SDL_RWwrite(rwops, buf, 1, remaining);
 		if (written == 0) {
-			SDL_FreeRW(rwops);
+			SDL_RWclose(rwops);
 			SDL_free(buffer);
 			fprintf(stderr, "failed to write the file %s\n", file);
 			return;
@@ -72,7 +72,7 @@ static void write (SDL_RWops *download)
 		buf += written;
 	}
 
-	SDL_FreeRW(rwops);
+	SDL_RWclose(rwops);
 	SDL_free(buffer);
 	printf("wrote to file %s\n", file);
 }
@@ -100,11 +100,9 @@ int main (int argc, char *argv[])
 		ret = EXIT_FAILURE;
 	} else {
 		printf("success with length: %i\n", (int) SDL_RWsize(rwops));
+		write(rwops);
+		SDL_RWclose(rwops);
 	}
-
-	write(rwops);
-
-	SDL_FreeRW(rwops);
 
 	if (SDL_RWHttpShutdown() == -1) {
 		fprintf(stderr, "%s\n", SDL_GetError());
