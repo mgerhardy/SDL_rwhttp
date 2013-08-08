@@ -22,6 +22,13 @@ static int fetchLimit;
 static const char *contentLength = "Content-Length: ";
 static const size_t strLength = 16;
 
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
+#define SDL_GetHint SDL_getenv
+#ifndef SDL_zerop
+#define SDL_zerop(x) SDL_memset((x), 0, sizeof(*(x)))
+#endif
+#endif
+
 int SDL_RWHttpShutdown (void)
 {
 #ifdef HAVE_CURL
@@ -95,6 +102,16 @@ typedef struct {
 	Uint8 *stop;
 } http_data_t;
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#define SEEK_INT Sint64
+#define READ_INT size_t
+#define WRITE_INT size_t
+#else
+#define SEEK_INT int
+#define READ_INT int
+#define WRITE_INT int
+#endif
+
 static int http_close (SDL_RWops * context)
 {
 	int status = 0;
@@ -115,13 +132,15 @@ static int http_close (SDL_RWops * context)
 	return status;
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 static Sint64 http_size (SDL_RWops * context)
 {
 	const http_data_t *data = (const http_data_t*) context->hidden.unknown.data1;
 	return (Sint64)(data->stop - data->base);
 }
+#endif
 
-static Sint64 http_seek (SDL_RWops * context, Sint64 offset, int whence)
+static SEEK_INT http_seek (SDL_RWops * context, SEEK_INT offset, int whence)
 {
 	http_data_t *data = (http_data_t*) context->hidden.unknown.data1;
 	Uint8 *newpos;
@@ -137,7 +156,8 @@ static Sint64 http_seek (SDL_RWops * context, Sint64 offset, int whence)
 		newpos = data->stop + offset;
 		break;
 	default:
-		return SDL_SetError("Unknown value for 'whence'");
+		SDL_SetError("Unknown value for 'whence'");
+		return -1;
 	}
 	if (newpos < data->base) {
 		newpos = data->base;
@@ -146,17 +166,17 @@ static Sint64 http_seek (SDL_RWops * context, Sint64 offset, int whence)
 		newpos = data->stop;
 	}
 	data->here = newpos;
-	return (Sint64)(data->here - data->base);
+	return (SEEK_INT)(data->here - data->base);
 }
 
-static size_t http_read (SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
+static READ_INT http_read (SDL_RWops * context, void *ptr, READ_INT size, READ_INT maxnum)
 {
 	http_data_t *data = (http_data_t*) context->hidden.unknown.data1;
-	size_t total_bytes;
-	size_t mem_available;
+	READ_INT total_bytes;
+	READ_INT mem_available;
 
 	total_bytes = (maxnum * size);
-	if (maxnum <= 0 || size <= 0 || total_bytes / maxnum != (size_t) size) {
+	if (maxnum <= 0 || size <= 0 || total_bytes / maxnum != size) {
 		return 0;
 	}
 
@@ -171,7 +191,7 @@ static size_t http_read (SDL_RWops * context, void *ptr, size_t size, size_t max
 	return total_bytes / size;
 }
 
-static size_t http_writeconst (SDL_RWops * context, const void *ptr, size_t size, size_t num)
+static WRITE_INT http_writeconst (SDL_RWops * context, const void *ptr, WRITE_INT size, WRITE_INT num)
 {
 	SDL_SetError("Can't write to read-only memory");
 	return 0;
@@ -341,7 +361,9 @@ static SDL_RWops* SDL_RWHttpCreate (http_data_t *httpData)
 	if (!rwops)
 		return NULL;
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	rwops->size = http_size;
+#endif
 	rwops->seek = http_seek;
 	rwops->read = http_read;
 	rwops->write = http_writeconst;

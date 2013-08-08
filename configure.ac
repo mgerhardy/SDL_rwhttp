@@ -1,4 +1,4 @@
-AC_INIT(SDL_rwhttp, 0.1.0, mgerhardy@github)
+AC_INIT(SDL_rwhttp, 0.2.0, mgerhardy@github)
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR(src/SDL_rwhttp.c)
 AC_CONFIG_HEADER(src/config.h)

@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 #define SDL_RWHTTP_MAJOR_VERSION   0
-#define SDL_RWHTTP_MINOR_VERSION   1
+#define SDL_RWHTTP_MINOR_VERSION   2
 #define SDL_RWHTTP_PATCHLEVEL      0
 
 #define SDL_RWHTTP_VERSION(x) \
