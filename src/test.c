@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// gcc src/test.c `pkg-config --libs SDL_rwhttp` `pkg-config --cflags SDL_rwhttp`
+// gcc src/test.c `pkg-config --libs --cflags SDL_rwhttp`
 
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 static int SDL_RWsize (SDL_RWops *rwops)
