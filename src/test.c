@@ -4,6 +4,20 @@
 
 // gcc src/test.c `pkg-config --libs SDL_rwhttp` `pkg-config --cflags SDL_rwhttp`
 
+#if !SDL_VERSION_ATLEAST(2, 0, 0)
+static int SDL_RWsize (SDL_RWops *rwops)
+{
+	int size;
+	const int pos = SDL_RWseek(rwops, 0, RW_SEEK_CUR);
+	if (pos < 0) {
+		return -1;
+	}
+	size = SDL_RWseek(rwops, 0, RW_SEEK_END);
+	SDL_RWseek(rwops, pos, RW_SEEK_SET);
+	return size;
+}
+#endif
+
 static void read (void **buffer, SDL_RWops *download)
 {
 	const long n = SDL_RWsize(download);
